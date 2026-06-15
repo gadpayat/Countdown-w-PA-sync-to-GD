@@ -118,13 +118,15 @@ const SHEET_URL =
 function calculateDaysRemaining(targetDate){
 
     const today = new Date();
+    today.setHours(0,0,0,0);
 
     const target = new Date(targetDate);
+    target.setHours(0,0,0,0);
 
     const diff =
       Math.ceil(
       (target - today) /
-      (1000*60*60*24));
+      (1000 * 60 * 60 * 24));
 
     return diff > 0 ? diff : 0;
 }
@@ -132,37 +134,54 @@ function calculateDaysRemaining(targetDate){
 function calculatePercentElapsed(startDate,targetDate){
 
     const start = new Date(startDate);
-
     const target = new Date(targetDate);
-
     const today = new Date();
 
     const total = target - start;
-
     const elapsed = today - start;
 
-    let percent = (elapsed/total)*100;
+    let percent = (elapsed / total) * 100;
 
     if(percent < 0) percent = 0;
-
     if(percent > 100) percent = 100;
 
     return percent.toFixed(1);
 }
 
-function determineStatus(daysRemaining,completionDate){
+function determineStatus(daysRemaining, completionDate, targetDate){
 
-    if(completionDate && completionDate !== "")
-    {
+    if(completionDate && completionDate !== ""){
+
+        const actual = new Date(completionDate);
+        const target = new Date(targetDate);
+
+        actual.setHours(0,0,0,0);
+        target.setHours(0,0,0,0);
+
+        if(actual < target){
+            return {
+                text:"Completed ahead of Time",
+                class:"completed",
+                dot:"green"
+            };
+        }
+
+        if(actual.getTime() === target.getTime()){
+            return {
+                text:"Completed on Time",
+                class:"completed",
+                dot:"green"
+            };
+        }
+
         return {
-            text:"Completed",
-            class:"completed",
-            dot:"green"
+            text:"Completed Late",
+            class:"delayed",
+            dot:"red"
         };
     }
 
-    if(daysRemaining <= 0)
-    {
+    if(daysRemaining <= 0){
         return {
             text:"Delayed",
             class:"delayed",
@@ -179,56 +198,65 @@ function determineStatus(daysRemaining,completionDate){
 
 async function loadProjects(){
 
-    const response = await fetch(SHEET_URL);
+    try{
 
-    const data = await response.json();
+        const response = await fetch(SHEET_URL);
 
-    const tbody =
-      document.getElementById("tableBody");
+        const data = await response.json();
 
-    tbody.innerHTML = "";
+        const tbody =
+          document.getElementById("tableBody");
 
-    data.forEach(project=>{
+        tbody.innerHTML = "";
 
-        const daysRemaining =
-          calculateDaysRemaining(
-          project.targetDate);
+        data.forEach(project=>{
 
-        const percentElapsed =
-          calculatePercentElapsed(
-          project.startDate,
-          project.targetDate);
+            const daysRemaining =
+              calculateDaysRemaining(
+              project.targetDate);
 
-        const status =
-          determineStatus(
-          daysRemaining,
-          project.completionDate);
+            const percentElapsed =
+              calculatePercentElapsed(
+              project.startDate,
+              project.targetDate);
 
-        tbody.innerHTML += `
-        <tr>
+            const status =
+              determineStatus(
+              daysRemaining,
+              project.completionDate,
+              project.targetDate);
 
-            <td>${project.barangay || "-"}</td>
+            tbody.innerHTML += `
+            <tr>
 
-            <td>${formatDate(project.startDate)}</td>
+                <td>${project.barangay || "-"}</td>
 
-            <td>${formatDate(project.targetDate)}</td>
+                <td>${formatDate(project.startDate)}</td>
 
-            <td>${formatDate(project.completionDate)}</td>
+                <td>${formatDate(project.targetDate)}</td>
 
-            <td>${project.accomplishment || "-"}</td>
+                <td>${formatDate(project.completionDate)}</td>
 
-            <td>${daysRemaining}</td>
+                <td>${project.accomplishment ? project.accomplishment + "%" : "-"}</td>
 
-            <td>${percentElapsed}%</td>
+                <td>${daysRemaining}</td>
 
-            <td class="${status.class}">
-                ${status.text}
-                <span class="dot ${status.dot}"></span>
-            </td>
+                <td>${percentElapsed}%</td>
 
-        </tr>
-        `;
-    });
+                <td class="${status.class}">
+                    ${status.text}
+                    <span class="dot ${status.dot}"></span>
+                </td>
+
+            </tr>
+            `;
+        });
+
+    }catch(error){
+
+        console.error("Error loading data:", error);
+
+    }
 }
 
 function formatDate(dateValue){
