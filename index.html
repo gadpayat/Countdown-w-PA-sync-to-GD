@@ -8,249 +8,82 @@
 
 <style>
 
-.close-btn{
-    position:fixed;
-    top:10px;
-    right:15px;
-    width:40px;
-    height:40px;
-    border:none;
-    background:#ff3131;
+body{
+    margin:0;
+    background:#111;
     color:white;
-    font-size:28px;
+    font-family:Arial,sans-serif;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    font-size:48px;
+}
+
+.table-container{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#1c1c1c;
+}
+
+thead{
+    background:#d72626;
+}
+
+th{
+    padding:15px;
+    font-size:22px;
+    text-align:center;
+}
+
+td{
+    padding:15px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,.15);
+    font-size:20px;
+}
+
+.running{
+    color:#00a2ff;
     font-weight:bold;
+}
+
+.completed{
+    color:#00ff66;
+    font-weight:bold;
+}
+
+.delayed{
+    color:#ff2e2e;
+    font-weight:bold;
+}
+
+.dot{
+    width:16px;
+    height:16px;
     border-radius:50%;
-    cursor:pointer;
-    z-index:9999;
+    display:inline-block;
+    margin-left:8px;
 }
 
-.close-btn:hover{
-    transform:scale(1.1);
+.green{
+    background:#00d26a;
 }
 
-</div>
-
-<script>
-function closeTable(){
-    document.getElementById("content").style.display="none";
+.red{
+    background:#ff3131;
 }
-</script>
-    
+
+</style>
+</head>
+
 <body>
-
-<button class="close-btn" onclick="closeTable()">×</button>
-
-<div id="content">
-
-<h1>Individual Project Completion Countdown</h1>
-
-<div class="table-container">
-
-<table>
-
-<thead>
-<tr>
-<th>Barangay, Municipality</th>
-<th>Actual Start Date</th>
-<th>Target Completion Date</th>
-<th>Actual Completion Date</th>
-<th>Physical Accomplishment</th>
-<th>Days Remaining</th>
-<th>% Time Elapsed</th>
-<th>Status</th>
-</tr>
-</thead>
-
-<tbody id="tableBody">
-<tr>
-<td colspan="8">Loading data...</td>
-</tr>
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<script>
-
-const SHEET_URL =
-"https://script.google.com/macros/s/AKfycbzXrtAV4koA2bX6aS2-mX_RfgomqpRhVJx6No8JP76yMM6qZFbweOZtdZU0OQ3BOcHgaA/exec";
-
-function closeTable(){
-    document.getElementById("content").style.display = "none";
-}
-
-function calculateDaysRemaining(targetDate){
-
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const target = new Date(targetDate);
-    target.setHours(0,0,0,0);
-
-    const diff =
-      Math.ceil(
-      (target - today) /
-      (1000 * 60 * 60 * 24));
-
-    return diff > 0 ? diff : 0;
-}
-
-function calculatePercentElapsed(startDate,targetDate){
-
-    const start = new Date(startDate);
-    const target = new Date(targetDate);
-    const today = new Date();
-
-    const total = target - start;
-    const elapsed = today - start;
-
-    let percent = (elapsed / total) * 100;
-
-    if(percent < 0) percent = 0;
-    if(percent > 100) percent = 100;
-
-    return percent.toFixed(1);
-}
-
-function determineStatus(daysRemaining, completionDate, targetDate){
-
-    if(completionDate && completionDate !== ""){
-
-        const actual = new Date(completionDate);
-        const target = new Date(targetDate);
-
-        actual.setHours(0,0,0,0);
-        target.setHours(0,0,0,0);
-
-        if(actual < target){
-            return {
-                text:"Completed ahead of Time",
-                class:"completed",
-                dot:"green"
-            };
-        }
-
-        if(actual.getTime() === target.getTime()){
-            return {
-                text:"Completed on Time",
-                class:"completed",
-                dot:"green"
-            };
-        }
-
-        return {
-            text:"Completed Late",
-            class:"delayed",
-            dot:"red"
-        };
-    }
-
-    if(daysRemaining <= 0){
-        return {
-            text:"Delayed",
-            class:"delayed",
-            dot:"red"
-        };
-    }
-
-    return {
-        text:"Running",
-        class:"running",
-        dot:"green"
-    };
-}
-
-async function loadProjects(){
-
-    try{
-
-        const response = await fetch(SHEET_URL);
-
-        const data = await response.json();
-
-        const tbody =
-          document.getElementById("tableBody");
-
-        tbody.innerHTML = "";
-
-        data.forEach(project=>{
-
-            const daysRemaining =
-              calculateDaysRemaining(
-              project.targetDate);
-
-            const percentElapsed =
-              calculatePercentElapsed(
-              project.startDate,
-              project.targetDate);
-
-            const status =
-              determineStatus(
-              daysRemaining,
-              project.completionDate,
-              project.targetDate);
-
-            tbody.innerHTML += `
-            <tr>
-
-                <td>${project.barangay || "-"}</td>
-
-                <td>${formatDate(project.startDate)}</td>
-
-                <td>${formatDate(project.targetDate)}</td>
-
-                <td>${formatDate(project.completionDate)}</td>
-
-                <td>${
-                    project.accomplishment !== ""
-                    && project.accomplishment != null
-                    ? (Number(project.accomplishment) * 100).toFixed(2) + "%"
-                    : "-"
-                }</td>
-
-                <td>${daysRemaining}</td>
-
-                <td>${percentElapsed}%</td>
-
-                <td class="${status.class}">
-                    ${status.text}
-                    <span class="dot ${status.dot}"></span>
-                </td>
-
-            </tr>
-            `;
-        });
-
-    }catch(error){
-
-        console.error("Error loading data:", error);
-
-    }
-}
-
-function formatDate(dateValue){
-
-    if(!dateValue) return "-";
-
-    const date = new Date(dateValue);
-
-    if(isNaN(date)) return "-";
-
-    return date.toISOString().split("T")[0];
-}
-
-window.addEventListener("DOMContentLoaded", loadProjects);
-
-</script>
-
-</body>
-
-<button class="close-btn" onclick="closeTable()">×</button>
-
-<div id="content">
 
 <h1>Individual Project Completion Countdown</h1>
 
@@ -446,7 +279,7 @@ function formatDate(dateValue){
     return date.toISOString().split("T")[0];
 }
 
-window.addEventListener("DOMContentLoaded", loadProjects);
+loadProjects();
 
 </script>
 
