@@ -142,7 +142,12 @@ td{
     animation: blinkRunning 1s infinite;
     
 }
-
+    
+.running-dot{
+    background:#0bf707;
+    animation: blinkRunning 1s infinite;
+}
+    
 .red{
     background:#ff3131;
 }
@@ -269,7 +274,7 @@ function determineStatus(daysRemaining, completionDate, targetDate){
     return {
         text:"Running",
         class:"running",
-        dot:"green"
+        dot:"running-dot"
     };
 }
 
