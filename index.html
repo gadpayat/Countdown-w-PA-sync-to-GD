@@ -35,7 +35,20 @@
 
     transition:all 0.2s ease;
 }
-
+    
+.close-btn::before{
+    content:"";
+    position:absolute;
+    top:6px;
+    left:8px;
+    width:60%;
+    height:25%;
+    border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    transform:rotate(-20deg);
+    pointer-events:none;
+}
+    
 .close-btn:hover{
     transform:translateY(-2px) scale(1.08);
 
@@ -130,7 +143,9 @@ td{
 
 <body>
 
-<button class="close-btn" onclick="closeTable()">×</button>
+<button class="close-btn" onclick="closeTable()">
+    <span>×</span>
+</button>
 
 <div id="content">
 
