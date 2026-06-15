@@ -27,6 +27,14 @@
 .close-btn:hover{
     transform:scale(1.1);
 }
+
+</div>
+
+<script>
+function closeTable(){
+    document.getElementById("content").style.display="none";
+}
+</script>
     
 <body>
 
@@ -239,6 +247,10 @@ window.addEventListener("DOMContentLoaded", loadProjects);
 </script>
 
 </body>
+
+<button class="close-btn" onclick="closeTable()">×</button>
+
+<div id="content">
 
 <h1>Individual Project Completion Countdown</h1>
 
