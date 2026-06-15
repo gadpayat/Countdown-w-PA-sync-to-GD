@@ -7,7 +7,22 @@
 <title>Individual Project Completion Countdown</title>
 
 <style>
+.close-btn{
+    position:fixed;
+    top:10px;
+    right:15px;
+    font-size:32px;
+    font-weight:bold;
+    color:white;
+    cursor:pointer;
+    z-index:9999;
+    background:none;
+    border:none;
+}
 
+.close-btn:hover{
+    color:#ff3131;
+}
 body{
     margin:0;
     background:#111;
@@ -84,6 +99,10 @@ td{
 </head>
 
 <body>
+
+<button class="close-btn" onclick="closeTable()">×</button>
+
+<div id="content">
 
 <h1>Individual Project Completion Countdown</h1>
 
@@ -281,7 +300,13 @@ function formatDate(dateValue){
 
 loadProjects();
 
+function closeTable(){
+    document.getElementById("content").style.display = "none";
+}
+    
 </script>
-
+    
+</div>
+    
 </body>
 </html>
