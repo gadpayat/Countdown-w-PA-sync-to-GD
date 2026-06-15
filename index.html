@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Individual Project Completion Countdown</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial,sans-serif;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    font-size:48px;
+}
+
+.table-container{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#1c1c1c;
+}
+
+thead{
+    background:#d72626;
+}
+
+th{
+    padding:15px;
+    font-size:22px;
+    text-align:center;
+}
+
+td{
+    padding:15px;
+    text-align:center;
+    border:1px solid rgba(255,255,255,.15);
+    font-size:20px;
+}
+
+.running{
+    color:#00a2ff;
+    font-weight:bold;
+}
+
+.completed{
+    color:#00ff66;
+    font-weight:bold;
+}
+
+.delayed{
+    color:#ff2e2e;
+    font-weight:bold;
+}
+
+.dot{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    display:inline-block;
+    margin-left:8px;
+}
+
+.green{
+    background:#00d26a;
+}
+
+.red{
+    background:#ff3131;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Individual Project Completion Countdown</h1>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>Barangay, Municipality</th>
+<th>Actual Start Date</th>
+<th>Target Completion Date</th>
+<th>Actual Completion Date</th>
+<th>Physical Accomplishment</th>
+<th>Days Remaining</th>
+<th>% Time Elapsed</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+const SHEET_URL =
+"YOUR_WEB_APP_URL";
+
+function calculateDaysRemaining(targetDate){
+
+    const today = new Date();
+
+    const target = new Date(targetDate);
+
+    const diff =
+      Math.ceil(
+      (target - today) /
+      (1000*60*60*24));
+
+    return diff > 0 ? diff : 0;
+}
+
+function calculatePercentElapsed(startDate,targetDate){
+
+    const start = new Date(startDate);
+
+    const target = new Date(targetDate);
+
+    const today = new Date();
+
+    const total = target - start;
+
+    const elapsed = today - start;
+
+    let percent = (elapsed/total)*100;
+
+    if(percent < 0) percent = 0;
+
+    if(percent > 100) percent = 100;
+
+    return percent.toFixed(1);
+}
+
+function determineStatus(daysRemaining,completionDate){
+
+    if(completionDate && completionDate !== "")
+    {
+        return {
+            text:"Completed",
+            class:"completed",
+            dot:"green"
+        };
+    }
+
+    if(daysRemaining <= 0)
+    {
+        return {
+            text:"Delayed",
+            class:"delayed",
+            dot:"red"
+        };
+    }
+
+    return {
+        text:"Running",
+        class:"running",
+        dot:"green"
+    };
+}
+
+async function loadProjects(){
+
+    const response = await fetch(SHEET_URL);
+
+    const data = await response.json();
+
+    const tbody =
+      document.getElementById("tableBody");
+
+    tbody.innerHTML = "";
+
+    data.forEach(project=>{
+
+        const daysRemaining =
+          calculateDaysRemaining(
+          project.targetDate);
+
+        const percentElapsed =
+          calculatePercentElapsed(
+          project.startDate,
+          project.targetDate);
+
+        const status =
+          determineStatus(
+          daysRemaining,
+          project.completionDate);
+
+        tbody.innerHTML += `
+        <tr>
+
+            <td>${project.barangay || "-"}</td>
+
+            <td>${formatDate(project.startDate)}</td>
+
+            <td>${formatDate(project.targetDate)}</td>
+
+            <td>${formatDate(project.completionDate)}</td>
+
+            <td>${project.accomplishment || "-"}</td>
+
+            <td>${daysRemaining}</td>
+
+            <td>${percentElapsed}%</td>
+
+            <td class="${status.class}">
+                ${status.text}
+                <span class="dot ${status.dot}"></span>
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+function formatDate(dateValue){
+
+    if(!dateValue) return "-";
+
+    const date = new Date(dateValue);
+
+    if(isNaN(date)) return "-";
+
+    return date.toISOString().split("T")[0];
+}
+
+loadProjects();
+
+setInterval(loadProjects,30000);
+
+</script>
+
+</body>
+</html>
