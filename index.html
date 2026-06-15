@@ -7,6 +7,13 @@
 <title>Individual Project Completion Countdown</title>
 
 <style>
+    
+@keyframes blinkRunning {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+}
+    
 .close-btn{
     position:fixed;
     top:10px;
@@ -132,6 +139,8 @@ td{
 
 .green{
     background:#00d26a;
+    animation: blinkRunning 1s infinite;
+    
 }
 
 .red{
