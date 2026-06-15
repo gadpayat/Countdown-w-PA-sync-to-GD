@@ -237,7 +237,12 @@ async function loadProjects(){
 
                 <td>${formatDate(project.completionDate)}</td>
 
-                <td>${project.accomplishment ? project.accomplishment + "%" : "-"}</td>
+                <td>${
+                    project.accomplishment !== ""
+                    && project.accomplishment != null
+                    ? (Number(project.accomplishment) * 100).toFixed(2) + "%"
+                    : "-"
+                }</td>
 
                 <td>${daysRemaining}</td>
 
