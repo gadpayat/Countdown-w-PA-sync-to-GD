@@ -108,7 +108,7 @@ td{
 }
 
 .running{
-    color:#00a2ff;
+    color:#f78605;
     font-weight:bold;
 }
 
@@ -245,7 +245,7 @@ function determineStatus(daysRemaining, completionDate, targetDate){
         return {
             text:"Completed Late",
             class:"delayed",
-            dot:"red"
+            dot:"green"
         };
     }
 
@@ -260,7 +260,7 @@ function determineStatus(daysRemaining, completionDate, targetDate){
     return {
         text:"Running",
         class:"running",
-        dot:"green"
+        dot:"#f78605"
     };
 }
 
