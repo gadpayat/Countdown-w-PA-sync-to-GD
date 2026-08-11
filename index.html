@@ -212,6 +212,11 @@ td{
     font-weight:bold;
 }
 
+.not-started{
+    color:#ffcc00;
+    font-weight:bold;
+}
+    
 .dot{
     width:16px;
     height:16px;
@@ -347,7 +352,7 @@ function determineStatus(daysRemaining, completionDate, targetDate){
     if(daysRemaining <= 0){
         return {
             text:"Not Yet Started",
-            class:"delayed",
+            class:"not-started",
             dot:"red"
         };
     }
