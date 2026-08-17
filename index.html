@@ -316,8 +316,20 @@ function calculatePercentElapsed(startDate,targetDate){
     return percent.toFixed(2);
 }
 
-function determineStatus(daysRemaining, completionDate, targetDate){
+function determineStatus(
+    daysRemaining,
+    completionDate,
+    targetDate,
+    percentElapsed,
+    accomplishment
+){
 
+    // Convert Physical Accomplishment to number
+    const physical = Number(accomplishment || 0) * 100;
+
+    // ==========================================
+    // COMPLETED PROJECT
+    // ==========================================
     if(completionDate && completionDate !== ""){
 
         const actual = new Date(completionDate);
@@ -349,7 +361,25 @@ function determineStatus(daysRemaining, completionDate, targetDate){
         };
     }
 
-    if(daysRemaining <= 0){
+    // ==========================================
+    // TIME HAS FULLY ELAPSED BUT PROJECT
+    // IS NOT 100% PHYSICALLY ACCOMPLISHED
+    // ==========================================
+    if(
+        Number(percentElapsed) >= 100 &&
+        physical < 100
+    ){
+        return {
+            text:"Ongoing",
+            class:"running",
+            dot:"running-dot"
+        };
+    }
+
+    // ==========================================
+    // NOT YET STARTED
+    // ==========================================
+    if(daysRemaining <= 0 && physical === 0){
         return {
             text:"Not Yet Started",
             class:"not-started",
@@ -357,6 +387,9 @@ function determineStatus(daysRemaining, completionDate, targetDate){
         };
     }
 
+    // ==========================================
+    // NORMAL ONGOING PROJECT
+    // ==========================================
     return {
         text:"Ongoing",
         class:"running",
@@ -389,10 +422,13 @@ async function loadProjects(){
               project.targetDate);
 
             const status =
-              determineStatus(
-              daysRemaining,
-              project.completionDate,
-              project.targetDate);
+            determineStatus(
+            daysRemaining,
+            project.completionDate,
+            project.targetDate,
+            percentElapsed,
+            project.accomplishment
+            );
 
             tbody.innerHTML += `
             <tr>
